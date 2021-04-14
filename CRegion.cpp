@@ -1,4 +1,5 @@
 #include "CRegion.h"
+#include <QDebug>
 
 CRegion::SDistalSynapse::SDistalSynapse(const int &columnIndex,
                                         const int &cellIndex,
@@ -509,8 +510,8 @@ void CRegion::initDistalSynapses(
   }
 }
 
-void CRegion::recognizeAndPredict(const QBitArray *BitSet) {
-  pCurrentBitSet = (QBitArray *)BitSet;
+void CRegion::recognizeAndPredict(QBitArray &BitSet) {
+  pCurrentBitSet = &BitSet;
   spartialPooler();
   temporalPooler();
 }
@@ -521,15 +522,26 @@ void CRegion::spartialPooler() {
   /*
    *  Phase 1: Overlap
    */
+
+  qDebug() << "Phase 1: Overlap\n";
+
   for (ColumnIndex = 0; ColumnIndex < Width * Height; ++ColumnIndex) {
     OverlapValue = 0;
     InactiveConnectedProximalSynapses = 0;
+
+    qDebug() << "max = " << Columns[ColumnIndex].ProximalDendriticSegmentSize << "\n";
+
     for (SynapseIndex = 0;
          SynapseIndex < Columns[ColumnIndex].ProximalDendriticSegmentSize;
          ++SynapseIndex)
       if (Columns[ColumnIndex]
               .ProximalDendriticSegment[SynapseIndex]
               .IsActive) {
+
+        qDebug() << "accessing " << Columns[ColumnIndex]
+                    .ProximalDendriticSegment[SynapseIndex]
+                    .BitIndex << "\n";
+
         OverlapValue +=
             (*pCurrentBitSet)[Columns[ColumnIndex]
                                   .ProximalDendriticSegment[SynapseIndex]
@@ -553,6 +565,8 @@ void CRegion::spartialPooler() {
   /*
    * Phase 2: Inhibition
    */
+  qDebug() << "Phase 2: Inhibition\n";
+
   QList<int> NeighborsList;
   for (ColumnIndex = 0; ColumnIndex < Width * Height; ++ColumnIndex) {
     neighbors(ColumnIndex, NeighborsList);
@@ -565,6 +579,9 @@ void CRegion::spartialPooler() {
   /*
    * Phase 3: Learning
    */
+  qDebug() << "Phase 3: Learning\n";
+
+
   for (ColumnIndex = 0; ColumnIndex < Width * Height; ++ColumnIndex) {
     if (Columns[ColumnIndex].IsActive) {
       for (SynapseIndex = 0;

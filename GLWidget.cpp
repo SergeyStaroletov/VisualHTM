@@ -211,8 +211,11 @@ void GLWidget::resizeGL(int width, int height) {
   glMatrixMode(GL_MODELVIEW);
 }
 
-void GLWidget::initRegion(const QBitArray &BitArray) {
-  Region->init(BitArray.size());
-  Region->recognizeAndPredict(&BitArray);
+void GLWidget::initRegion(QBitArray &BitArray) {
+  qDebug() << BitArray.size() << "\n";
+   Region->init(BitArray.size());
+
+   qDebug() << "rec" << "\n";
+  Region->recognizeAndPredict(BitArray);
   // Region->init(&BitArray);
 }
